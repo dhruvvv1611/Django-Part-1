@@ -11,44 +11,23 @@ from rest_framework.views import APIView
 from rest_framework.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin
 from rest_framework.generics import ListCreateAPIView
 from rest_framework.generics import RetrieveUpdateDestroyAPIView
+from rest_framework.viewsets import ModelViewSet
 
-class ProductList(ListCreateAPIView):
-    queryset = Product.objects.select_related('collection').all()
+class ProductViewSet(ModelViewSet):
+    queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    
+
     def get_serializer_context(self):
         return {'request': self.request}
     
-class CollectionList(ListCreateAPIView):
-
-    queryset = Collection.objects.annotate(
-        product_count=Count('products')
-    )
-    serializer_class = CollectionSerializer
-    
-    def post(self, request, pk):
-        serializer = CollectionSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-class ProductDetail(RetrieveUpdateDestroyAPIView):
-
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
-    
-
     def delete(self, request, pk):
         product = get_object_or_404(Product, pk=pk)
         if product.orderitems.count() > 0:
             return Response({'error': 'Product cannot be deleted because it is associated with an order item.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
         product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
 
-
-class CollectionDetail(RetrieveUpdateDestroyAPIView):
-
+class CollectionViewSet(ModelViewSet):
     queryset = Collection.objects.annotate(
         product_count=Count('products')
     )
@@ -60,8 +39,8 @@ class CollectionDetail(RetrieveUpdateDestroyAPIView):
             return Response({'error': 'Collection cannot be deleted because it includes one or more products.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
         collection.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-        
 
+    
 
     
    
