@@ -4,7 +4,7 @@ from rest_framework import status
 from store.filters import ProductFilter
 from store.pagination import DefaultPagination
 from .models import Product, Collection, OrderItem, Review, Cart, CartItem
-from .serializers import CartItemSerializer, CollectionSerializer, ProductSerializer, ReviewSerializer, CartSerializer
+from .serializers import CartItemSerializer, CollectionSerializer, ProductSerializer, ReviewSerializer, CartSerializer, AddCartItemSerializer, UpdateCartItemSerializer
 from django.db.models import Count
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from django_filters.rest_framework import DjangoFilterBackend
@@ -22,8 +22,6 @@ class ProductViewSet(ModelViewSet):
     ordering_fields = ['unit_price', 'last_update']
     pagination_class = DefaultPagination
 
-
-   
     def get_serializer_context(self):
         return {'request': self.request}
     
@@ -58,7 +56,17 @@ class CartViewSet(CreateModelMixin,RetrieveModelMixin,GenericViewSet,DestroyMode
     serializer_class = CartSerializer
 
 class CartItemViewSet(ModelViewSet):
-    serializer_class = CartItemSerializer
+    http_method_names = ['get', 'post', 'patch', 'delete']
+    
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return AddCartItemSerializer
+        elif self.request.method == 'PATCH':
+            return UpdateCartItemSerializer
+        return CartItemSerializer
+    
+    def get_serializer_context(self):
+        return {'cart_id': self.kwargs['cart_pk']}
     
     def get_queryset(self):
         return CartItem.objects.filter(cart_id=self.kwargs['cart_pk']).select_related('product')
