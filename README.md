@@ -19,3 +19,5 @@ Here're some of the project's best features:
 ![Django ORM](https://img.shields.io/badge/Django-ORM-darkgreen)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-blue?logo=postgresql)
 ![Git](https://img.shields.io/badge/Git-Version%20Control-orange?logo=git)
+
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY4OTc4MDc4LCJpYXQiOjE3Njg4OTE2NzgsImp0aSI6ImEwMjViMTE0YThkMTQ1ZDdhYTEzYzlhMjc4ZjQzYzQ2IiwidXNlcl9pZCI6IjQifQ.5WqQzxCEiio7qxRCuw5PSgvFpECSY-z6zRnBpgJyE0Q
