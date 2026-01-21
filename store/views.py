@@ -4,8 +4,8 @@ from rest_framework import status
 from store.filters import ProductFilter
 from store.pagination import DefaultPagination
 from store.permissions import IsAdminOrReadOnly
-from .models import Product, Customer, Collection, OrderItem, Review, Cart, CartItem
-from .serializers import CartItemSerializer, CollectionSerializer, CustomerSerializer, ProductSerializer, ReviewSerializer, CartSerializer, AddCartItemSerializer, UpdateCartItemSerializer
+from .models import Product, Customer, Collection, OrderItem, Review, Cart, CartItem, Order, OrderItem
+from .serializers import CartItemSerializer, CollectionSerializer, CustomerSerializer, ProductSerializer, ReviewSerializer, CartSerializer, AddCartItemSerializer, UpdateCartItemSerializer, OrderSerializer, CreateOrderSerializer, UpdateOrderSerializer
 from django.db.models import Count
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from django_filters.rest_framework import DjangoFilterBackend
@@ -99,7 +99,41 @@ class CustomerViewSet(ModelViewSet):
           serializer.is_valid(raise_exception=True)
           serializer.save()
           return Response(serializer.data)
-       
+      
+class OrderViewSet(ModelViewSet):
+    http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
+
+    def create(self, request, *args, **kwargs):
+        serializer = CreateOrderSerializer(data=request.data, context=self.get_serializer_context())
+        serializer.is_valid(raise_exception=True)
+        order =  serializer.save()
+        serializer = OrderSerializer(order)
+        return Response(serializer.data)
+
+    def get_serializer_class(self):
+         if self.request.method == 'POST':
+                return CreateOrderSerializer
+         elif self.request.method in ['PATCH', 'DELETE']:
+                return UpdateOrderSerializer
+         return OrderSerializer
+            
+    def get_permissions(self):
+        if self.request.method in ['PATCH', 'DELETE']:
+            return [IsAdminUser()]
+        return [IsAuthenticated()]
+
+    def get_serializer_context(self):
+        return {'user_id': self.request.user.id }
+
+    def get_queryset(self):
+        if self.request.user.is_staff:
+            return Order.objects.all()
+        (customer_id, created) = Customer.objects.only('id').get_or_create(user_id=self.request.user.id)
+        return Order.objects.filter(customer_id=customer_id)
+    
+
+
+  
 
 
 
